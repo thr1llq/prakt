@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Вакансии</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles2.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Результаты поиска вакансий:</h1>
+        <h2><p>Общее количество вакансий: {{ total_vacancies }}</p></h2>
+
+        <div class="vacancies">
+            <div class="vacancy-header">
+                <div class="header-item">Вакансия</div>
+                <div class="header-item">Компания</div>
+                <div class="header-item">Местоположение</div>
+                <div class="header-item">Навыки</div>
+                <div class="header-item">Зарплата</div>
+                <div class="header-item">Ссылка</div>
+            </div>
+            {% for vacancy in vacancies %}
+                <div class="vacancy">
+                    <p>{{ vacancy['title'] }}</p>
+                    <p>{{ vacancy['name_company'] }}</p>
+                    <p>{{ vacancy['location'] }}</p>
+                    <p>{{ vacancy['requirements'] }}</p>
+                    <p>{{ vacancy['salary'] }}</p>
+                    <p><a href="{{ vacancy['url'] }}" class="button">Ссылка</a></p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
+
+
+
