@@ -8,7 +8,7 @@ app = Flask(__name__, static_folder='static')
 
 def insert_data_to_mysql(connection, vacancy_data, link):
     with connection.cursor() as cursor:
-        insert_query = "INSERT INTO user2 (`Job Title`, `Company`, `Location`, `Skills`, `Salary`, `Link`) VALUES (%s, %s, %s, %s, %s, %s)"
+        insert_query = "INSERT INTO user3 (`Job Title`, `Company`, `Location`, `Skills`, `Salary`, `Link`) VALUES (%s, %s, %s, %s, %s, %s)"
         try:
             cursor.execute(insert_query, (
                 str(vacancy_data['title'][:32]).replace('\x00', ''),
@@ -18,14 +18,16 @@ def insert_data_to_mysql(connection, vacancy_data, link):
                 str(vacancy_data['salary'][:32]).replace('\x00', ''),
                 str(link).replace('\x00', '')
             ))
-            connection.commit()  
+            connection.commit()
+            
+            print("Data inserted successfully.") 
         except pymysql.err.DataError as e:
             print(f"Error inserting data: {e}")
 
 
 def connect_to_mysql():
     connection = pymysql.connect(
-        host='localhost',  
+        host='db',  
         port=3306,
         user='root',  
         password='FrotLig13',  
@@ -38,25 +40,30 @@ def connect_to_mysql():
 
     return connection
 
+
 def reset_mysql_table(connection):
     with connection.cursor() as cursor:
-        drop_query = "DROP TABLE IF EXISTS `user2`;"
-        create_table_query = """CREATE TABLE user2 (
+        drop_query = "DROP TABLE IF EXISTS `user3`;"
+        create_table_query = """CREATE TABLE user3 (
           `id` int(11) NOT NULL AUTO_INCREMENT,
-          `Job Title` varchar(255),
-          `Company` varchar(255),
-          `Location` varchar(255),
-          `Skills` varchar(255),
-          `Salary` varchar(255),
-          `Link` text,
+          `Job Title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+          `Company` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+          `Location` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+          `Skills` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+          `Salary` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+          `Link` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
           PRIMARY KEY (`id`)
-        ) ENGINE=InnoDB;
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         """
-        print("Dropping table `user2`...")
+        alter_database_query = "ALTER DATABASE prakt CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;"
+        print("Altering database encoding...")
+        cursor.execute(alter_database_query)
+        print("Dropping table `user3`...")
         cursor.execute(drop_query)
-        print("Creating table `user2`...")
+        print("Creating table `user3`...")
         cursor.execute(create_table_query)
-        print("Table `user2` created.")
+        print("Table `user3` created.")
+
 
 @app.route('/')
 def index():
@@ -81,6 +88,7 @@ def parse_and_filter_vacancies(position, city, work_type, skills, company, salar
 
     URL_T = "https://career.habr.com/vacancies?type=all"
     page_num = 1
+
 
     while True:
         url = f"{URL_T}&page={page_num}"
@@ -127,3 +135,5 @@ if __name__ == "__main__":
     connection = connect_to_mysql()
     reset_mysql_table(connection)
     app.run(debug=True, host='0.0.0.0')
+
+
